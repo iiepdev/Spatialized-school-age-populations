@@ -1,0 +1,175 @@
+﻿Geo Code,Geo Name,Line Number
+"01","Canada",2
+"10","Newfoundland and Labrador",256
+"10001","St. John's",510
+"10005","Bay Roberts",764
+"10010","Grand Falls-Windsor",1018
+"10011","Gander",1272
+"10015","Corner Brook",1526
+"11","Prince Edward Island",1780
+"11105","Charlottetown",2034
+"11110","Summerside",2288
+"12","Nova Scotia",2542
+"12205","Halifax",2796
+"12210","Kentville",3050
+"12215","Truro",3304
+"12220","New Glasgow",3558
+"12225","Cape Breton",3812
+"13","New Brunswick",4066
+"13305","Moncton",4320
+"13310","Saint John",4574
+"13320","Fredericton",4828
+"13328","Bathurst",5082
+"13329","Miramichi",5336
+"13330","Campbellton",5590
+"1333013","Campbellton (New Brunswick part)",5844
+"1333024","Campbellton (Quebec part)",6098
+"13335","Edmundston",6352
+"24","Quebec",6606
+"24403","Matane",6860
+"24404","Rimouski",7114
+"24405","Rivière-du-Loup",7368
+"24406","Baie-Comeau",7622
+"24408","Saguenay",7876
+"24410","Alma",8130
+"24411","Dolbeau-Mistassini",8384
+"24412","Sept-Îles",8638
+"24421","Québec",8892
+"24423","Sainte-Marie",9146
+"24428","Saint-Georges",9400
+"24430","Thetford Mines",9654
+"24433","Sherbrooke",9908
+"24437","Cowansville",10162
+"24440","Victoriaville",10416
+"24442","Trois-Rivières",10670
+"24444","Shawinigan",10924
+"24447","Drummondville",11178
+"24450","Granby",11432
+"24452","Saint-Hyacinthe",11686
+"24454","Sorel-Tracy",11940
+"24456","Joliette",12194
+"24462","Montréal",12448
+"24465","Salaberry-de-Valleyfield",12702
+"24468","Lachute",12956
+"24480","Val-d'Or",13210
+"24485","Rouyn-Noranda",13464
+"35","Ontario",13718
+"35501","Cornwall",13972
+"35502","Hawkesbury",14226
+"3550224","Hawkesbury (Quebec part)",14480
+"3550235","Hawkesbury (Ontario part)",14734
+"35505","Ottawa - Gatineau",14988
+"3550524","Ottawa - Gatineau (Quebec part)",15242
+"3550535","Ottawa - Gatineau (Ontario part)",15496
+"35507","Arnprior",15750
+"35509","Carleton Place",16004
+"35512","Brockville",16258
+"35515","Pembroke",16512
+"35516","Petawawa",16766
+"35521","Kingston",17020
+"35522","Belleville",17274
+"35527","Cobourg",17528
+"35528","Port Hope",17782
+"35529","Peterborough",18036
+"35530","Kawartha Lakes",18290
+"35531","Centre Wellington",18544
+"35532","Oshawa",18798
+"35533","Ingersoll",19052
+"35535","Toronto",19306
+"35537","Hamilton",19560
+"35539","St. Catharines - Niagara",19814
+"35541","Kitchener - Cambridge - Waterloo",20068
+"35543","Brantford",20322
+"35544","Woodstock",20576
+"35546","Tillsonburg",20830
+"35547","Norfolk",21084
+"35550","Guelph",21338
+"35553","Stratford",21592
+"35555","London",21846
+"35556","Chatham-Kent",22100
+"35557","Leamington",22354
+"35559","Windsor",22608
+"35562","Sarnia",22862
+"35565","Wasaga Beach",23116
+"35566","Owen Sound",23370
+"35567","Collingwood",23624
+"35568","Barrie",23878
+"35569","Orillia",24132
+"35571","Midland",24386
+"35575","North Bay",24640
+"35580","Greater Sudbury",24894
+"35582","Elliot Lake",25148
+"35586","Timmins",25402
+"35590","Sault Ste. Marie",25656
+"35595","Thunder Bay",25910
+"35598","Kenora",26164
+"46","Manitoba",26418
+"46602","Winnipeg",26672
+"46603","Winkler",26926
+"46605","Steinbach",27180
+"46607","Portage la Prairie",27434
+"46610","Brandon",27688
+"46640","Thompson",27942
+"47","Saskatchewan",28196
+"47705","Regina",28450
+"47710","Yorkton",28704
+"47715","Moose Jaw",28958
+"47720","Swift Current",29212
+"47725","Saskatoon",29466
+"47735","North Battleford",29720
+"47745","Prince Albert",29974
+"47750","Estevan",30228
+"47755","Weyburn",30482
+"48","Alberta",30736
+"48805","Medicine Hat",30990
+"48806","Brooks",31244
+"48810","Lethbridge",31498
+"48820","Okotoks",31752
+"48821","High River",32006
+"48825","Calgary",32260
+"48826","Strathmore",32514
+"48828","Canmore",32768
+"48830","Red Deer",33022
+"48831","Sylvan Lake",33276
+"48832","Lacombe",33530
+"48833","Camrose",33784
+"48835","Edmonton",34038
+"48840","Lloydminster",34292
+"4884047","Lloydminster (Saskatchewan part)",34546
+"4884048","Lloydminster (Alberta part)",34800
+"48845","Cold Lake",35054
+"48850","Grande Prairie",35308
+"48860","Wood Buffalo",35562
+"48865","Wetaskiwin",35816
+"59","British Columbia",36070
+"59905","Cranbrook",36324
+"59907","Nelson",36578
+"59913","Penticton",36832
+"59915","Kelowna",37086
+"59918","Vernon",37340
+"59920","Salmon Arm",37594
+"59925","Kamloops",37848
+"59930","Chilliwack",38102
+"59932","Abbotsford - Mission",38356
+"59933","Vancouver",38610
+"59934","Squamish",38864
+"59935","Victoria",39118
+"59937","Duncan",39372
+"59938","Nanaimo",39626
+"59939","Parksville",39880
+"59940","Port Alberni",40134
+"59943","Courtenay",40388
+"59944","Campbell River",40642
+"59945","Powell River",40896
+"59950","Williams Lake",41150
+"59952","Quesnel",41404
+"59955","Prince Rupert",41658
+"59965","Terrace",41912
+"59970","Prince George",42166
+"59975","Dawson Creek",42420
+"59977","Fort St. John",42674
+"60","Yukon",42928
+"60990","Whitehorse",43182
+"61","Northwest Territories",43436
+"61995","Yellowknife",43690
+"62","Nunavut",43944
