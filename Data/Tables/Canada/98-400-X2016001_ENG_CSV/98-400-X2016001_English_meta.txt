@@ -1,0 +1,369 @@
+﻿***********************************************************************************
+** General Information 
+***********************************************************************************
+
+Age (in Single Years) and Average Age (127) and Sex (3) for the Population of Canada, Provinces and Territories, Census Metropolitan Areas and Census Agglomerations, 2016 and 2011 Censuses - 100% Data
+
+Catalog number: 98-400-X2016001	Release date: May 03, 2017	Topic: Age and sex
+
+
+Historical comparison
+
+In order to facilitate data comparisons over time, the data from previous census years in this table may have been adjusted to reflect the current geographic boundaries, as closely as possible. Exercise caution if comparing data from this table to data produced in previous survey cycles. For additional information on the geographic boundary changes over time, please refer to the specific geography definitions in the Dictionary, Census of Population, 2016, catalogue number 98-301-X.
+
+The boundaries and names of municipalities (census subdivisions) can change from one census to the next because of annexations, dissolutions and incorporations. To minimize the impact of these municipal changes on data dissemination, the census team is producing a profile for dissolved census subdivisions.
+ 
+Note on data quality and disclosure control
+ 
+For information on data quality, as well as random rounding, data suppression, and other methods of disclosure control, please consult the Guide to the Census of Population, 2016, Catalogue no. 98-304-X, and the reference guides for the individual topics.
+
+Source: Statistics Canada, 2016 Census, Catalogue no. 98-400-X2016001.
+
+
+***********************************************************************************
+** Symbol 
+***********************************************************************************
+
+	..		not available for a specific reference period
+
+	...		not applicable
+
+	F		too unreliable to be published
+
+	x		suppressed to meet the confidentiality requirements of the Statistics Act
+
+
+***********************************************************************************
+** Geography Notes 
+***********************************************************************************
+
+2016 Census: Data quality flags and descriptions
+
+Short-form data quality flags for place of residence
+
+Digit description
+
+First (0XXXX): Incomplete enumeration flag
+Second (X0XXX): Short-form data quality flag
+Third (XX0XX): Short-form income data quality flag 
+Fourth (XXX0X): Not applicable
+Fifth (XXXX0): Not applicable 
+
+
+Flag description
+
+Incomplete enumeration flag
+
+0 = Default. Not applicable.
+1 = Incompletely enumerated Indian reserve or Indian settlement (suppressed).
+2 = Excludes census data for one or more incompletely enumerated Indian reserves or Indian settlements.
+
+Short-form data quality flag
+
+0 = Default. Data quality index showing a short-form global non-response rate lower than 10%.
+1 = Data quality index showing a short-form global non-response rate higher than or equal to 10%, but lower than 20%.
+2 = Data quality index showing a short-form global non-response rate higher than or equal to 20%, but lower than 30%.
+3 = Data quality index showing a short-form global non-response rate higher than or equal to 30%, but lower than 40%.
+4 = Data quality index showing a short-form global non-response rate higher than or equal to 40%, but lower than 50%.
+5 = Data quality index showing a short-form global non-response rate higher than or equal to 50% (suppressed).
+9 = Short-form data suppressed to meet the confidentiality requirements of the Statistics Act.
+
+Short-form income data quality flag
+
+0 = Default. Data quality index showing a short-form income non-response rate lower than 10%.
+1 = Data quality index showing a short-form income non-response rate higher than or equal to 10%, but lower than 20%.
+2 = Data quality index showing a short-form income non-response rate higher than or equal to 20%, but lower than 30%.
+3 = Data quality index showing a short-form income non-response rate higher than or equal to 30%.
+9 = Short-form income data suppressed to meet the confidentiality requirements of the Statistics Act.
+
+Not applicable
+
+0 = Default.
+
+Not applicable
+
+0 = Default.
+
+
+
+
+Aggregate dissemination area (ADA)
+The aggregate dissemination area (ADA) is a new dissemination geography created for the 2016 Census. ADAs cover the entire country and, where possible, have a population between 5,000 and 15,000 based on the previous census population counts. ADAs are created from existing dissemination geographic areas and are formed from census tracts (CTs), census subdivisions (CSDs) or dissemination areas (DAs). ADAs respect provincial, territorial, census division (CD), census metropolitan area (CMA) and census agglomeration (CA) with census tract (CT) boundaries.
+
+The intent of the ADA geography is to ensure the availability of census data, where possible, across all regions of Canada.
+
+
+Census metropolitan influenced zones (MIZ)  
+The census metropolitan influenced zone (MIZ) is a concept that geographically differentiates the area of Canada outside census metropolitan areas (CMAs) and census agglomerations (CAs). Census subdivisions (CSDs) within provinces that are outside CMAs and CAs are assigned to one of four categories according to the degree of influence (strong, moderate, weak or no influence) that the CMAs or CAs have on them. CSDs within the territories that are outside CAs are assigned to a separate category.
+
+A municipality within a province is assigned to a census metropolitan influenced zone (MIZ) category depending on the percentage of its resident employed labour force that commute to work in one or more of the municipalities (census subdivisions) that are part of the delineation core of a CMA or CA. The calculation of the resident employed labour force excludes the category of no fixed workplace address. CSDs with the same degree of influence tend to be clustered. They form zones around CMAs and CAs that progress through the categories from 'strong' to 'no' influence as distance from the CMAs and CAs increases. As many CSDs in the territories are very large and sparsely populated, the commuting flow of the resident employed labour force is unstable. For this reason, CSDs in the territories that are outside CAs are assigned to a separate category that is not based on their commuting flows.
+
+Note: The data on place of work are taken from the Census Program. Commuting, i.e., the journey to work, comprises four categories: at home; outside Canada; no fixed workplace address; and usual place of work. The calculation of the resident employed labour force excludes the category of no fixed workplace address for the 2016 Census.
+
+CSDs outside CMAs and CAs are assigned to the following MIZ categories:
+1.Strong metropolitan influenced zone: This category includes CSDs in provinces where at least 30% of the CSD's resident employed labour force (excluding the category of no fixed workplace address) commutes to work in any CMA or CA. It excludes CSDs with fewer than 40 persons in their resident employed labour force from the previous census.
+2.Moderate metropolitan influenced zone: This category includes CSDs in provinces where at least 5% but less than 30% of the CSD's resident employed labour force (excluding the category of no fixed workplace address) commute to work in any CMA or CA. It excludes CSDs with fewer than 40 persons in their resident employed labour force from the previous census.
+3.Weak metropolitan influenced zone: This category includes CSDs in provinces where more than 0% but less than 5% of the CSD's resident employed labour force (excluding the category of no fixed workplace address) commute to work in any CMA or CA. It excludes CSDs with fewer than 40 persons in their resident employed labour force from the previous census.
+4.No metropolitan influenced zone: This category includes CSDs in provinces where none of the CSD's resident employed labour force (excluding the category of no fixed workplace address) commute to work in any CMA or CA. It also includes CSDs in provinces with fewer than 40 persons in their resident employed labour force from the previous census.
+5.Territories (outside CAs): This category includes CSDs in the territories outside CAs.
+
+
+Land area  
+Number of square kilometres of land in a given geographic area (e.g., a province, a territory, a city). Land area data are unofficial and are provided for the sole purpose of calculating population density.
+
+
+Statistical Area Classification (SAC)  
+The Statistical Area Classification (SAC) groups census subdivisions (CSD) according to whether they are a component of a census metropolitan area (CMA), a census agglomeration (CA) or a census metropolitan influenced zone (MIZ). The MIZ categorizes all CSDs in provinces and territories that are outside CMAs and CAs. CSDs within provinces that are outside CMAs and CAs are assigned to one of four categories according to the degree of influence (strong, moderate, weak or no influence) that the CMAs or CAs have on them. CSDs within the territories that are outside CAs are assigned to a separate category.
+
+The SAC is a variant of the Standard Geographical Classification (SGC). CSDs form the lowest level of the classification variant. The next level consists of CMAs, CAs and MIZs including the territories. The highest level consists of two categories that cover all of the land mass of Canada:
+•inside census metropolitan areas and census agglomerations
+•outside census metropolitan areas and census agglomerations.
+
+The SAC provides unique numeric identification (codes) for these hierarchically-related geographic areas. It was established for the purpose of reporting statistics.
+
+
+Census agglomeration (CA)  
+See the definition of census metropolitan area (CMA) and census agglomeration (CA). 
+
+
+Census division (CD)  
+Group of neighbouring municipalities joined together for the purposes of regional planning and managing common services (such as police or ambulance services). These groupings are established under laws in effect in certain provinces of Canada. Census division (CD) is the general term for provincially legislated areas (such as county, municipalité régionale de comté and regional district) or their equivalents. In other provinces and the territories where laws do not provide for such areas, Statistics Canada defines equivalent areas for statistical reporting purposes in cooperation with these provinces and territories. Census divisions are intermediate geographic areas between the province/territory level and the municipality (census subdivision).
+
+Census metropolitan area (CMA) and census agglomeration (CA) 
+A census metropolitan area (CMA) or a census agglomeration (CA) is formed by one or more adjacent municipalities centred on a population centre (known as the core). A CMA must have a total population of at least 100,000 of which 50,000 or more must live in the core based on adjusted data from the previous Census of Population Program. A CA must have a core population of at least 10,000 also based on data from the previous Census of Population Program. To be included in the CMA or CA, other adjacent municipalities must have a high degree of integration with the core, as measured by commuting flows derived from data on place of work from the previous Census Program.
+
+If the population of the core of a CA falls below 10,000, the CA is retired from the next census. However, once an area becomes a CMA, it is retained as a CMA even if its total population declines below 100,000 or the population of its core falls below 50,000. All areas inside the CMA or CA that are not population centres are rural areas.
+
+When a CA has a core of at least 50,000, based on data from the previous Census of Population, it is subdivided into census tracts. Census tracts are maintained for the CA even if the population of the core subsequently falls below 50,000. All CMAs are subdivided into census tracts.
+
+
+Census subdivision (CSD)  
+Census subdivision (CSD) is the general term for municipalities (as determined by provincial/territorial legislation) or areas treated as municipal equivalents for statistical purposes (e.g., Indian reserves, Indian settlements and unorganized territories). Municipal status is defined by laws in effect in each province and territory in Canada.
+
+
+Census tract (CT)  
+Census tracts (CTs) are small, relatively stable geographic areas that usually have a population of less than 10,000 persons, based on data from the previous Census of Population Program. They are located in census metropolitan areas and in census agglomerations that had a core population of 50,000 or more in the previous census.
+
+A committee of local specialists (for example, planners, health and social workers, and educators) initially delineates census tracts in conjunction with Statistics Canada. Once a census metropolitan area (CMA) or census agglomeration (CA) has been subdivided into census tracts, the census tracts are maintained even if the core population subsequently declines below 50,000.
+
+
+Designated place (DPL)
+Usually a small community that does not meet the criteria used to define municipalities or population centres (areas with a population of at least 1,000 and a density of 400 persons per square kilometre). Designated places are created by provinces and territories, in cooperation with Statistics Canada, to provide data for submunicipal areas.
+
+Dissemination area (DA)
+A dissemination area (DA) is a small, relatively stable geographic unit composed of one or more adjacent dissemination blocks with an average population of 400 to 700 persons based on data from the previous Census of Population Program. It is the smallest standard geographic area for which all census data are disseminated. DAs cover all the territory of Canada.
+
+Federal electoral district (FED) 
+A federal electoral district (FED) is an area represented by a member of the House of Commons. The federal electoral district boundaries used for the 2016 Census are based on the 2013 Representation Order.
+
+Province or territory
+'Province' and 'territory' refer to the major political units of Canada. From a statistical point of view, province and territory are basic areas for which data are tabulated. Canada is divided into 10 provinces and 3 territories.
+
+Rural area (RA) 
+Rural areas (RAs) include all territory lying outside population centres (POPCTRs). Taken together, population centres and rural areas cover all of Canada.
+
+Rural population includes all population living in rural areas of census metropolitan areas (CMAs) and census agglomerations (CAs), as well as population living in rural areas outside CMAs and CAs.
+
+
+Postal code [OM]   
+The postal codeOM is a six-character code defined and maintained by Canada Post Corporation for the purpose of sorting and delivering mail.
+
+
+Core, fringe and rural area 
+The terms 'core,' 'fringe' and 'rural area' distinguish between population centres (POPCTR) and rural areas (RA) within a census metropolitan area (CMA) or census agglomeration (CA).
+
+A CMA or CA can have two types of cores: the core and the secondary core. The core is the population centre (POPCTR) with the highest population, around which a CMA or a CA is delineated. The boundaries and population counts of the population centres (core) used to delineate the CMAs or CAs are taken from the previous census. The core must have a population of at least 50,000 persons in the case of a CMA, or at least 10,000 persons in the case of a CA.
+
+The secondary core is a population centre with at least 10,000 persons (based on the previous census) and that is within a CMA or CA, but outside the main municipality (census subdivision) that contains the core. The secondary core can also be the core of a CA that has been merged with an adjacent CMA.
+
+The term 'fringe' is applied to all population centres (POPCTRs) within a CMA or CA that have less than 10,000 persons (based on the previous census) that are not contiguous to a core or a secondary core. In some circumstances (POPCTRs) that have 10,000 or more persons (based on the previous census) are designated 'fringe'. These are POPCTRs that exist inside census subdivisions (CSD) that are already contiguous with a core or a secondary core. All territory within a CMA or CA that is not classified as a core or fringe is classified as 'rural area'.
+
+
+Population centre (POPCTR)  
+A population centre (POPCTR) has a population of at least 1,000 and a population density of 400 persons or more per square kilometre, based on population counts from the current Census of Population. All areas outside population centres are classified as rural areas.
+
+Taken together, population centres and rural areas cover all of Canada.
+
+Population centres are classified into three groups, depending on the size of their population:
+•small population centres, with a population between 1,000 and 29,999
+•medium population centres, with a population between 30,000 and 99,999
+•large urban population centres, with a population of 100,000 or more.
+
+Population centre population includes all population living in the cores, secondary cores and fringes of census metropolitan areas (CMAs) and census agglomerations (CAs), as well as the population living in population centres outside CMAs and CAs.
+
+
+Economic region (ER) 
+An economic region (ER) is a grouping of complete census divisions (CDs), with one exception in Ontario, created as a standard geographic unit for analysis of regional economic activity.
+
+***********************************************************************************
+** Definitions / Footnotes 
+***********************************************************************************
+
+Census year (2)
+
+Member
+   1. 2016
+   2. 2011
+
+
+
+
+Age (in single years) and average age (127)
+
+Definition
+
+
+Age
+
+'Age' refers to the age of a person (or subject) of interest at last birthday (or relative to a specified, well-defined reference date).
+
+
+Member
+   1. Total - Age
+   2.   0 to 14 years
+   3.     0 to 4 years
+   4.       Under 1 year
+   5.       1
+   6.       2
+   7.       3
+   8.       4
+   9.     5 to 9 years
+  10.       5
+  11.       6
+  12.       7
+  13.       8
+  14.       9
+  15.     10 to 14 years
+  16.       10
+  17.       11
+  18.       12
+  19.       13
+  20.       14
+  21.   15 to 64 years
+  22.     15 to 19 years
+  23.       15
+  24.       16
+  25.       17
+  26.       18
+  27.       19
+  28.     20 to 24 years
+  29.       20
+  30.       21
+  31.       22
+  32.       23
+  33.       24
+  34.     25 to 29 years
+  35.       25
+  36.       26
+  37.       27
+  38.       28
+  39.       29
+  40.     30 to 34 years
+  41.       30
+  42.       31
+  43.       32
+  44.       33
+  45.       34
+  46.     35 to 39 years
+  47.       35
+  48.       36
+  49.       37
+  50.       38
+  51.       39
+  52.     40 to 44 years
+  53.       40
+  54.       41
+  55.       42
+  56.       43
+  57.       44
+  58.     45 to 49 years
+  59.       45
+  60.       46
+  61.       47
+  62.       48
+  63.       49
+  64.     50 to 54 years
+  65.       50
+  66.       51
+  67.       52
+  68.       53
+  69.       54
+  70.     55 to 59 years
+  71.       55
+  72.       56
+  73.       57
+  74.       58
+  75.       59
+  76.     60 to 64 years
+  77.       60
+  78.       61
+  79.       62
+  80.       63
+  81.       64
+  82.   65 years and over
+  83.     65 to 69 years
+  84.       65
+  85.       66
+  86.       67
+  87.       68
+  88.       69
+  89.     70 to 74 years
+  90.       70
+  91.       71
+  92.       72
+  93.       73
+  94.       74
+  95.     75 to 79 years
+  96.       75
+  97.       76
+  98.       77
+  99.       78
+ 100.       79
+ 101.     80 to 84 years
+ 102.       80
+ 103.       81
+ 104.       82
+ 105.       83
+ 106.       84
+ 107.     85 years and over
+ 108.       85 to 89 years
+ 109.         85
+ 110.         86
+ 111.         87
+ 112.         88
+ 113.         89
+ 114.       90 to 94 years
+ 115.         90
+ 116.         91
+ 117.         92
+ 118.         93
+ 119.         94
+ 120.       95 to 99 years
+ 121.         95
+ 122.         96
+ 123.         97
+ 124.         98
+ 125.         99
+ 126.       100 years and over
+ 127. Average age
+
+
+
+
+Sex (3)
+
+Definition
+
+
+Sex
+
+'Sex' refers to whether the person is male or female.
+
+
+Member
+   1. Total - Sex
+   2.   Male
+   3.   Female
+
+
+
