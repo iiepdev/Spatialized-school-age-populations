@@ -4,7 +4,7 @@ import numpy as np
 
 ## Loading the data we obtained from the QGIS routine
 
-os.chdir("C:\\Users\\g.vargas\\BOX\\IIEP_MyProjects\\MP_01000298\\WorkFiles_Experts\\298-Issue-Papers\\298-Issue-Paper-Sprague\\Replication files\\Data\\Tables\\Bangladesh") ## Replace this be your own folder
+os.chdir("C:\\Users\\g.vargas\\BOX\\IIEP_MyProjects\\MP_01000298_RND_SDA\\WorkFiles_Experts\\298-Issue-Papers\\298-Issue-Paper-Sprague\\Replication files\\Data\\Tables\\Bangladesh") ## Replace this be your own folder
 data = pd.read_csv("Administrative boundaries - Level 4 - Untreated.csv") ## Note that 
 PopulationEstimates = pd.DataFrame(data, columns = ['ADM4_PCODE', 'F_0_to_1sum', 'F_1_to_4sum', 'F_5_to_9sum', 'F_10_to_14sum', 'F_15_to_19sum', 'F_20_to_24sum', 'F_25_to_29sum', 'F_30_to_34sum', 'F_35_to_39sum', 'M_0_to_1sum', 'M_1_to_4sum', 'M_5_to_9sum', 'M_10_to_14sum', 'M_15_to_19sum', 'M_20_to_24sum', 'M_25_to_29sum', 'M_30_to_34sum', 'M_35_to_39sum'])
 
