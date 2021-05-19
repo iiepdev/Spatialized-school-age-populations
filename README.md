@@ -1,4 +1,4 @@
-# Sprague-multipliers
+# Spatialized school age populations
  
 This methodology uses Sprague multipliers (Sprague, 1880) to interpolate data and obtain population estimates by single years of age for different administrative boundaries (polygons), that can then be reassembled according to any official school-age groups in a country. 
 
