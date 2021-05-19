@@ -1,4 +1,4 @@
-# Sprague-multipliers
+# Spatialized school age populations
  
 This methodology uses Sprague multipliers (Sprague, 1880) to interpolate data and obtain population estimates by single years of age for different administrative boundaries (polygons), that can then be reassembled according to any official school-age groups in a country. 
 
@@ -8,4 +8,8 @@ To allow for maximum transparency and replicability, all supporting documents, c
 
 Note that the full databases used can be downloaded from https://box.iiep.unesco.org/s/TkPrnQyXYr6Qtjd 
 
-This tool was helpful? Let us know how you used it, and suggest improvements by contacting us development@iiep.unesco.org
+This material is available in Open Access under the Attribution-ShareAlike 3.0 IGO (CC-BY-SA 3.0 IGO) licence (http://creativecommons.org/licenses/by-sa/3.0/igo/). By using the content of this publication, the users accept to be bound by the terms of use of the UNESCO Open Access Repository (http://www.unesco.org/open-access/terms-use-ccbysa-en). The present licence applies exclusively to the original contents of the IIEP Education Policy Toolbox.
+
+This material has been partly funded by UK aid from the UK government; however the views expressed do not necessarily reflect the UK government’s official policies.
+
+Was this tool helpful? Let us know how you used it, and suggest improvements by contacting us development@iiep.unesco.orgg
