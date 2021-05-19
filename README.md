@@ -8,4 +8,6 @@ To allow for maximum transparency and replicability, all supporting documents, c
 
 Note that the full databases used can be downloaded from https://box.iiep.unesco.org/s/TkPrnQyXYr6Qtjd 
 
+This material has been partly funded by UK aid from the UK government; however the views expressed do not necessarily reflect the UK government’s official policies.
+
 This tool was helpful? Let us know how you used it, and suggest improvements by contacting us development@iiep.unesco.org
