@@ -7,3 +7,5 @@ This approach can be applied to other types of polygons, such as buffer-based or
 To allow for maximum transparency and replicability, all supporting documents, calculations, codes, databases, and images are fully available to the public . This includes fully commented Jupyter notebooks for all mentioned countries. In order to open the files included on these folders, the user will need to have QGIS 3.X installed on his or her computer, and Jupyter notebook to view the Robustness checks.
 
 Note that the full databases used can be downloaded from https://box.iiep.unesco.org/s/TkPrnQyXYr6Qtjd 
+
+This tool was helpful? Let us know how you used it, and suggest improvements by contacting us development@iiep.unesco.org
