@@ -8,7 +8,7 @@ To allow for maximum transparency and replicability, all supporting documents, c
 
 Note that the full databases used can be downloaded from https://box.iiep.unesco.org/s/TkPrnQyXYr6Qtjd 
 
-This material is available in Open Access under the Attribution-ShareAlike 3.0 IGO (CC-BY-SA 3.0 IGO) licence (http://creativecommons.org/licenses/by-sa/3.0/igo/). By using the content of this publication, the users accept to be bound by the terms of use of the UNESCO Open Access Repository (http://www.unesco.org/open-access/terms-use-ccbysa-en). The present licence applies exclusively to the original contents of the IIEP Education Policy Toolbox.
+This material is available in Open Access under the Attribution-ShareAlike 3.0 IGO (CC-BY-SA 3.0 IGO) licence (http://creativecommons.org/licenses/by-sa/3.0/igo/). By using the content of this repository, the users accept to be bound by the terms of use of the UNESCO Open Access Repository (http://www.unesco.org/open-access/terms-use-ccbysa-en).
 
 This material has been partly funded by UK aid from the UK government; however the views expressed do not necessarily reflect the UK government’s official policies.
 
