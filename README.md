@@ -1,9 +1,9 @@
 # Spatialized school age populations
  
 This is the package related to the IIEP (2021, forthcoming) paper "Estimating school-age populations by applying Sprague multipliers to raster data". 
-This methodology uses Sprague multipliers (Sprague, 1880) to interpolate data and obtain population estimates by single years of age for different administrative boundaries (polygons), that are then reassembled according to any official school-age groups in any territory. 
+This methodology uses Sprague multipliers (Sprague, 1880) to interpolate data and obtain population estimates by single years of age for different administrative boundaries (polygons), that are then reassembled according to any official school-age groups for any territory. 
 
-This approach can be applied to other types of polygons, such as buffer-based or isochrone-based school catchment areas, or school-centered Voronoi polygons. The approach can be applied to any country or administrative division, by simply changing the corresponding population estimates' raster files, and changing the names to the country in question. The methodology will be illustrated here with Bangladesh, and robustness checks are performed on Canada, Colombia, Rwanda, Seychelles, and Uganda. 
+This approach can be applied to other types of polygons, any country or administrative division, by simply changing the corresponding population estimates' raster files, and changing the names to the territory in question. The methodology is illustrated with Bangladesh, and robustness checks are performed on Canada, Colombia, Rwanda, Seychelles, and Uganda. 
 
 To allow for maximum transparency and replicability, all supporting documents, calculations, codes, databases, and images are fully available to the public . This includes fully commented Jupyter notebooks for all mentioned countries. In order to open the files included on these folders, the user will need to have QGIS 3.X installed on his or her computer, and Jupyter notebook to view the Robustness checks.
 
