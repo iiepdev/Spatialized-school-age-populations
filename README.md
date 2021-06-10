@@ -11,4 +11,4 @@ IIEPdev work is available under the Open Access under the Attribution-ShareAlike
 
 This material has been partly funded by UK aid from the UK government; however the views expressed do not necessarily reflect the UK government’s official policies.
 
-Was this tool helpful? Let us know how you used it, and suggest improvements by contacting us development@iiep.unesco.orgg
+Was this tool helpful? Let us know how you used it, and suggest improvements by contacting us development@iiep.unesco.org
