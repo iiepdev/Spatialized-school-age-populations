@@ -1,7 +1,6 @@
 # Spatialized school age populations
  
-This is the package related to the IIEP (2021, forthcoming) paper "Estimating school-age populations by applying Sprague multipliers to raster data". 
-This methodology uses Sprague multipliers to interpolate data and obtain population estimates by single years of age for different administrative boundaries (polygons), that are then reassembled according to any official school-age groups for any territory. 
+This is the package related to the IIEP 2021 paper "Estimating school-age populations by applying Sprague multipliers to raster data" (https://unesdoc.unesco.org/ark:/48223/pf0000379198). This methodology uses Sprague multipliers to interpolate data and obtain population estimates by single years of age for different administrative boundaries (polygons), that are then reassembled according to any official school-age groups for any territory. 
 
 This approach can be applied to other types of polygons, any country or administrative division, by simply changing the corresponding population estimates' raster files, and changing the names to the territory in question. The methodology is illustrated with Bangladesh, and robustness checks are performed on Canada, Colombia, Rwanda, Seychelles, and Uganda. 
 
