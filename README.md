@@ -24,7 +24,7 @@ Was this tool helpful? Let us know how you used it, and suggest improvements by 
 
 ### Metadata
 
-#### Spatialized school age populations - Didactic example.xlsx
+#### Spatialized school age populations - Estimating-SAP-Sprague.xlsx
 
 Excel file that allows users to explore the internal functioning of the Sprague multipliers, as well as obtaining disaggregated single years of age for any group of 5-year age groups.
 
