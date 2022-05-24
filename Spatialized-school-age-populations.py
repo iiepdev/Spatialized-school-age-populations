@@ -1,13 +1,8 @@
 """
 Model exported as python.
 Name : Sprague multipliers
-Group : 
-With QGIS : 31802
-
-
-This publication is available in Open Access under the Attribution-ShareAlike 3.0 IGO (CC-BY-SA 3.0 IGO) licence (http://creativecommons.org/licenses/by-sa/3.0/igo/). By using the content of this publication, the users accept to be bound by the terms of use of the UNESCO Open Access Repository (http://www.unesco.org/open-access/terms-use-ccbysa-en). The present licence applies exclusively to the original contents of the IIEP Education Policy Toolbox.
-
-This tool was helpful? Let us know how you used it, and suggest improvements by contacting us development@iiep.unesco.org
+Group : Final models
+With QGIS : 32003
 """
 
 from qgis.core import QgsProcessing
@@ -50,7 +45,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         param = QgsProcessingParameterBoolean('SystemdividedinLowerandUppersecondary', 'System divided in Lower and Upper secondary', optional=True, defaultValue=True)
         param.setFlags(param.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
         self.addParameter(param)
-        param = QgsProcessingParameterNumber('Lowersecondarystartingage', 'Lower secondary starting age', optional=True, type=QgsProcessingParameterNumber.Integer, minValue=10, maxValue=14, defaultValue=None)
+        param = QgsProcessingParameterNumber('Lowersecondarystartingage', 'Lower secondary starting age', optional=True, type=QgsProcessingParameterNumber.Integer, minValue=10, maxValue=15, defaultValue=None)
         param.setFlags(param.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
         self.addParameter(param)
         param = QgsProcessingParameterNumber('Lowersecondaryduration', 'Lower secondary duration', optional=True, type=QgsProcessingParameterNumber.Integer, minValue=1, maxValue=8, defaultValue=None)
@@ -71,63 +66,41 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFeatureSink('Results', 'Results', type=QgsProcessing.TypeVectorAnyGeometry, createByDefault=True, supportsAppend=True, defaultValue=None))
         self.addParameter(QgsProcessingParameterFeatureSink('ResultsWithLowerAndUpperSecondary', 'Results with Lower and Upper secondary', type=QgsProcessing.TypeVectorAnyGeometry, createByDefault=True, supportsAppend=True, defaultValue=None))
         self.addParameter(QgsProcessingParameterFeatureSink('ResultsWithSecondary', 'Results with Secondary', type=QgsProcessing.TypeVectorAnyGeometry, createByDefault=True, supportsAppend=True, defaultValue=None))
-        self.addParameter(QgsProcessingParameterBoolean('VERBOSE_LOG', 'Verbose logging', optional=True, defaultValue=False))
 
     def processAlgorithm(self, parameters, context, model_feedback):
         # Use a multi-step feedback, so that individual child algorithm progress reports are adjusted for the
         # overall progress through the model
-        feedback = QgsProcessingMultiStepFeedback(45, model_feedback)
+        feedback = QgsProcessingMultiStepFeedback(52, model_feedback)
         results = {}
         outputs = {}
 
-        # Distinguish between Lower and Upper secondary
+        # Female  0 to 1
         alg_params = {
+            'COLUMN_PREFIX': 'F_0_',
+            'INPUT': parameters['Administrativeboundaries'],
+            'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_0_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_0_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_0_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
+            'RASTER_BAND': 1,
+            'STATISTICS': [1],  # Sum
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
         }
-        outputs['DistinguishBetweenLowerAndUpperSecondary'] = processing.run('native:condition', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+        outputs['Female0To1'] = processing.run('native:zonalstatisticsfb', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
         feedback.setCurrentStep(1)
         if feedback.isCanceled():
             return {}
 
-        # Female 0 to 1
+        # Random points in extent
         alg_params = {
-            'COLUMN_PREFIX': 'F_0_',
-            'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_0_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_0_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_0_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
-            'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'EXTENT': '1.000000000,1.000000000,1.000000000,1.000000000',
+            'MAX_ATTEMPTS': 200,
+            'MIN_DISTANCE': 0,
+            'POINTS_NUMBER': 1,
+            'TARGET_CRS': 'ProjectCrs',
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
         }
-        outputs['Female0To1'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+        outputs['RandomPointsInExtent'] = processing.run('native:randompointsinextent', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
         feedback.setCurrentStep(2)
-        if feedback.isCanceled():
-            return {}
-
-        # Female 1 to 4
-        alg_params = {
-            'COLUMN_PREFIX': 'F_1_',
-            'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_1_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_1_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_1_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
-            'RASTER_BAND': 1,
-            'STATISTICS': [1]
-        }
-        outputs['Female1To4'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(3)
-        if feedback.isCanceled():
-            return {}
-
-        # Female 5 to 9
-        alg_params = {
-            'COLUMN_PREFIX': 'F_5_',
-            'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_5_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_5_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_5_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
-            'RASTER_BAND': 1,
-            'STATISTICS': [1]
-        }
-        outputs['Female5To9'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(4)
         if feedback.isCanceled():
             return {}
 
@@ -136,7 +109,125 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreateCustomAgeGroups'] = processing.run('native:condition', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
+        feedback.setCurrentStep(3)
+        if feedback.isCanceled():
+            return {}
+
+        # Preparing the table to export the parameters
+        alg_params = {
+            'FIELDS_MAPPING': [{'expression': ' @ISOcountrycode ','length': 0,'name': 'ISO country code','precision': 0,'type': 10},{'expression': ' @Year ','length': 0,'name': 'Year','precision': 0,'type': 2}],
+            'INPUT': outputs['RandomPointsInExtent']['OUTPUT'],
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['PreparingTheTableToExportTheParameters'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(4)
+        if feedback.isCanceled():
+            return {}
+
+        # Distinguish between Lower and Upper secondary
+        alg_params = {
+        }
+        outputs['DistinguishBetweenLowerAndUpperSecondary'] = processing.run('native:condition', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
         feedback.setCurrentStep(5)
+        if feedback.isCanceled():
+            return {}
+
+        # Export to spreadsheet
+        alg_params = {
+            'FORMATTED_VALUES': False,
+            'LAYERS': outputs['PreparingTheTableToExportTheParameters']['OUTPUT'],
+            'OUTPUT': QgsExpression('@Foldercontainingtherasterfiles || \'/\' || \'Population_estimates_\' ||  lower(@ISOcountrycode)  || to_string( @Year ) || \'Parameters\' || \'.xlsx\'').evaluate(),
+            'OVERWRITE': False,
+            'USE_ALIAS': False,
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['ExportToSpreadsheet'] = processing.run('native:exporttospreadsheet', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(6)
+        if feedback.isCanceled():
+            return {}
+
+        # Female 1 to 4
+        alg_params = {
+            'COLUMN_PREFIX': 'F_1_',
+            'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_1_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_1_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_1_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
+            'RASTER_BAND': 1,
+            'STATISTICS': [1],  # Sum
+        }
+        outputs['Female1To4'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(7)
+        if feedback.isCanceled():
+            return {}
+
+        # Preparing the table to export the parameters - Secondary
+        alg_params = {
+            'FIELDS_MAPPING': [{'expression': ' @ISOcountrycode ','length': 0,'name': 'ISO country code','precision': 0,'type': 10},{'expression': ' @Year ','length': 0,'name': 'Year','precision': 0,'type': 2},{'expression': ' @Preprimarystartingage ','length': 0,'name': 'Pre-primary starting age','precision': 0,'type': 2},{'expression': ' @Preprimaryduration ','length': 0,'name': 'Pre-primary duration','precision': 0,'type': 2},{'expression': '@Primarystartingage','length': 0,'name': 'Primary starting age','precision': 0,'type': 2},{'expression': '@Primaryduration','length': 0,'name': 'Primary duration','precision': 0,'type': 2},{'expression': '@Lowersecondarystartingage','length': 0,'name': 'Lower secondary starting age','precision': 0,'type': 2},{'expression': '@Lowersecondaryduration','length': 0,'name': 'Lower secondary duration','precision': 0,'type': 2},{'expression': '@Uppersecondarystartingage','length': 0,'name': 'Upper secondary starting age','precision': 0,'type': 2},{'expression': '@Uppersecondaryduration','length': 0,'name': 'Upper secondary duration','precision': 0,'type': 2}],
+            'INPUT': outputs['RandomPointsInExtent']['OUTPUT'],
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['PreparingTheTableToExportTheParametersSecondary'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(8)
+        if feedback.isCanceled():
+            return {}
+
+        # Preparing the table to export the parameters - Lower and Upper secondary
+        alg_params = {
+            'FIELDS_MAPPING': [{'expression': ' @ISOcountrycode ','length': 0,'name': 'ISO country code','precision': 0,'type': 10},{'expression': ' @Year ','length': 0,'name': 'Year','precision': 0,'type': 2},{'expression': ' @Preprimarystartingage ','length': 0,'name': 'Pre-primary starting age','precision': 0,'type': 2},{'expression': ' @Preprimaryduration ','length': 0,'name': 'Pre-primary duration','precision': 0,'type': 2},{'expression': '@Primarystartingage','length': 0,'name': 'Primary starting age','precision': 0,'type': 2},{'expression': '@Primaryduration','length': 0,'name': 'Primary duration','precision': 0,'type': 2},{'expression': '@Secondarystartingage','length': 0,'name': 'Secondary starting age','precision': 0,'type': 2},{'expression': '@Secondaryduration','length': 0,'name': 'Secondary duration','precision': 0,'type': 2}],
+            'INPUT': outputs['RandomPointsInExtent']['OUTPUT'],
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['PreparingTheTableToExportTheParametersLowerAndUpperSecondary'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(9)
+        if feedback.isCanceled():
+            return {}
+
+        # Export to spreadsheet
+        alg_params = {
+            'FORMATTED_VALUES': False,
+            'LAYERS': outputs['PreparingTheTableToExportTheParametersLowerAndUpperSecondary']['OUTPUT'],
+            'OUTPUT': QgsExpression('@Foldercontainingtherasterfiles || \'/\' || \'Population_estimates_\' ||  lower(@ISOcountrycode)  || to_string( @Year ) || \'Parameters\' || \'.xlsx\'').evaluate(),
+            'OVERWRITE': False,
+            'USE_ALIAS': False,
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['ExportToSpreadsheet'] = processing.run('native:exporttospreadsheet', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(10)
+        if feedback.isCanceled():
+            return {}
+
+        # Female 5 to 9
+        alg_params = {
+            'COLUMN_PREFIX': 'F_5_',
+            'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_5_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_5_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_5_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
+            'RASTER_BAND': 1,
+            'STATISTICS': [1],  # Sum
+        }
+        outputs['Female5To9'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(11)
+        if feedback.isCanceled():
+            return {}
+
+        # Export to spreadsheet
+        alg_params = {
+            'FORMATTED_VALUES': False,
+            'LAYERS': outputs['PreparingTheTableToExportTheParametersSecondary']['OUTPUT'],
+            'OUTPUT': QgsExpression('@Foldercontainingtherasterfiles || \'/\' || \'Population_estimates_\' ||  lower(@ISOcountrycode)  || to_string( @Year ) || \'Parameters\' || \'.xlsx\'').evaluate(),
+            'OVERWRITE': False,
+            'USE_ALIAS': False,
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['ExportToSpreadsheet'] = processing.run('native:exporttospreadsheet', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(12)
         if feedback.isCanceled():
             return {}
 
@@ -144,13 +235,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'F_10_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_10_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_10_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_10_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Female10To14'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(6)
+        feedback.setCurrentStep(13)
         if feedback.isCanceled():
             return {}
 
@@ -158,13 +249,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'F_15_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_15_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_15_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_15_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Female15To19'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(7)
+        feedback.setCurrentStep(14)
         if feedback.isCanceled():
             return {}
 
@@ -172,13 +263,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'F_20_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_20_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_20_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_20_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Female20To24'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(8)
+        feedback.setCurrentStep(15)
         if feedback.isCanceled():
             return {}
 
@@ -186,13 +277,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'F_25_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_25_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_25_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_25_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Female25To29'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(9)
+        feedback.setCurrentStep(16)
         if feedback.isCanceled():
             return {}
 
@@ -200,13 +291,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'F_30_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_30_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_30_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_30_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Female30To34'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(10)
+        feedback.setCurrentStep(17)
         if feedback.isCanceled():
             return {}
 
@@ -214,13 +305,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'F_35_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_35_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_35_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_35_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Female35To39'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(11)
+        feedback.setCurrentStep(18)
         if feedback.isCanceled():
             return {}
 
@@ -228,13 +319,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'M_0_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_0_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_0_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_0_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Male0To1'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(12)
+        feedback.setCurrentStep(19)
         if feedback.isCanceled():
             return {}
 
@@ -242,13 +333,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'M_1_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_1_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_1_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_1_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Male1To4'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(13)
+        feedback.setCurrentStep(20)
         if feedback.isCanceled():
             return {}
 
@@ -256,13 +347,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'M_5_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_5_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_5_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_5_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Male5To9'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(14)
+        feedback.setCurrentStep(21)
         if feedback.isCanceled():
             return {}
 
@@ -270,13 +361,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'M_10_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_10_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_10_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_10_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Male10To14'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(15)
+        feedback.setCurrentStep(22)
         if feedback.isCanceled():
             return {}
 
@@ -284,13 +375,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'M_15_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_15_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_15_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_15_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Male15To19'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(16)
+        feedback.setCurrentStep(23)
         if feedback.isCanceled():
             return {}
 
@@ -298,13 +389,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'M_20_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_20_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_20_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_20_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Male20To24'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(17)
+        feedback.setCurrentStep(24)
         if feedback.isCanceled():
             return {}
 
@@ -312,13 +403,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'M_25_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_25_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_25_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_25_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Male25To29'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(18)
+        feedback.setCurrentStep(25)
         if feedback.isCanceled():
             return {}
 
@@ -326,13 +417,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'M_30_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_30_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_30_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_30_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Male30To34'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(19)
+        feedback.setCurrentStep(26)
         if feedback.isCanceled():
             return {}
 
@@ -340,25 +431,25 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         alg_params = {
             'COLUMN_PREFIX': 'M_35_',
             'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_35_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_35_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_m_35_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': parameters['Administrativeboundaries'],
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
             'RASTER_BAND': 1,
-            'STATISTICS': [1]
+            'STATISTICS': [1],  # Sum
         }
         outputs['Male35To39'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(20)
+        feedback.setCurrentStep(27)
         if feedback.isCanceled():
             return {}
 
         # Creating the 0 to 4 age groups
         alg_params = {
             'FIELDS_MAPPING': [{'expression': '\"F_5_sum\"','length': 0,'name': 'F_5_sum','precision': 0,'type': 6},{'expression': '\"F_10_sum\"','length': 0,'name': 'F_10_sum','precision': 0,'type': 6},{'expression': '\"F_15_sum\"','length': 0,'name': 'F_15_sum','precision': 0,'type': 6},{'expression': '\"F_20_sum\"','length': 0,'name': 'F_20_sum','precision': 0,'type': 6},{'expression': '\"F_25_sum\"','length': 0,'name': 'F_25_sum','precision': 0,'type': 6},{'expression': '\"F_30_sum\"','length': 0,'name': 'F_30_sum','precision': 0,'type': 6},{'expression': '\"F_35_sum\"','length': 0,'name': 'F_35_sum','precision': 0,'type': 6},{'expression': 'M_5_sum','length': 0,'name': 'M_5_sum','precision': 0,'type': 6},{'expression': 'M_10_sum','length': 0,'name': 'M_10_sum','precision': 0,'type': 6},{'expression': 'M_15_sum','length': 0,'name': 'M_15_sum','precision': 0,'type': 6},{'expression': 'M_20_sum','length': 0,'name': 'M_20_sum','precision': 0,'type': 6},{'expression': 'M_25_sum','length': 0,'name': 'M_25_sum','precision': 0,'type': 6},{'expression': 'M_30_sum','length': 0,'name': 'M_30_sum','precision': 0,'type': 6},{'expression': 'M_35_sum','length': 0,'name': 'M_35_sum','precision': 0,'type': 6},{'expression': '\"F_0_sum\" + \"F_1_sum\"','length': 0,'name': 'F_0_sum','precision': 0,'type': 6},{'expression': '\"M_0_sum\" + \"M_1_sum\"','length': 0,'name': 'M_0_sum','precision': 0,'type': 6}],
-            'INPUT': parameters['Administrativeboundaries'],
+            'INPUT': outputs['Male35To39']['INPUT_VECTOR'],
             'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
         }
         outputs['CreatingThe0To4AgeGroups'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(21)
+        feedback.setCurrentStep(28)
         if feedback.isCanceled():
             return {}
 
@@ -370,7 +461,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CalculatingSingleYearsOfAgeSection1'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(22)
+        feedback.setCurrentStep(29)
         if feedback.isCanceled():
             return {}
 
@@ -380,7 +471,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreateSpatialIndexSection1'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(23)
+        feedback.setCurrentStep(30)
         if feedback.isCanceled():
             return {}
 
@@ -392,7 +483,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CalculatingSingleYearsOfAgeSection2'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(24)
+        feedback.setCurrentStep(31)
         if feedback.isCanceled():
             return {}
 
@@ -402,7 +493,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreateSpatialIndexSection2'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(25)
+        feedback.setCurrentStep(32)
         if feedback.isCanceled():
             return {}
 
@@ -414,7 +505,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CalculatingSingleYearsOfAgeSection3'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(26)
+        feedback.setCurrentStep(33)
         if feedback.isCanceled():
             return {}
 
@@ -424,7 +515,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreateSpatialIndexSection3'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(27)
+        feedback.setCurrentStep(34)
         if feedback.isCanceled():
             return {}
 
@@ -434,14 +525,14 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
             'INPUT': outputs['CreateSpatialIndexSection1']['OUTPUT'],
             'JOIN': outputs['CreateSpatialIndexSection2']['OUTPUT'],
             'JOIN_FIELDS': [''],
-            'METHOD': 1,
-            'PREDICATE': [2],
+            'METHOD': 1,  # Take attributes of the first matching feature only (one-to-one)
+            'PREDICATE': [2],  # equals
             'PREFIX': '',
             'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
         }
         outputs['JoinAttributesByLocationSection1And2'] = processing.run('native:joinattributesbylocation', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(28)
+        feedback.setCurrentStep(35)
         if feedback.isCanceled():
             return {}
 
@@ -451,7 +542,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreateSpatialIndexForSection1And2'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(29)
+        feedback.setCurrentStep(36)
         if feedback.isCanceled():
             return {}
 
@@ -461,14 +552,14 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
             'INPUT': outputs['CreateSpatialIndexForSection1And2']['OUTPUT'],
             'JOIN': outputs['CreateSpatialIndexSection3']['OUTPUT'],
             'JOIN_FIELDS': [''],
-            'METHOD': 1,
-            'PREDICATE': [2],
+            'METHOD': 1,  # Take attributes of the first matching feature only (one-to-one)
+            'PREDICATE': [2],  # equals
             'PREFIX': '',
             'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
         }
         outputs['JoinAttributesByLocationSections1Through3'] = processing.run('native:joinattributesbylocation', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(30)
+        feedback.setCurrentStep(37)
         if feedback.isCanceled():
             return {}
 
@@ -480,7 +571,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['ReorganizingTheResults'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(31)
+        feedback.setCurrentStep(38)
         if feedback.isCanceled():
             return {}
 
@@ -492,17 +583,17 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CalculatingSchoolAgesWithSecondary'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(32)
+        feedback.setCurrentStep(39)
         if feedback.isCanceled():
             return {}
 
-        # Create spatial index for Secondary
+        # Create spatial index for administrative boundaries
         alg_params = {
-            'INPUT': outputs['CalculatingSchoolAgesWithSecondary']['OUTPUT']
+            'INPUT': parameters['Administrativeboundaries']
         }
-        outputs['CreateSpatialIndexForSecondary'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+        outputs['CreateSpatialIndexForAdministrativeBoundaries'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(33)
+        feedback.setCurrentStep(40)
         if feedback.isCanceled():
             return {}
 
@@ -514,7 +605,27 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CalculatingSchoolAgesWithLowerAndUpperSecondary'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(34)
+        feedback.setCurrentStep(41)
+        if feedback.isCanceled():
+            return {}
+
+        # Create spatial index for Secondary
+        alg_params = {
+            'INPUT': outputs['CalculatingSchoolAgesWithSecondary']['OUTPUT']
+        }
+        outputs['CreateSpatialIndexForSecondary'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(42)
+        if feedback.isCanceled():
+            return {}
+
+        # Create spatial index for Lower and Upper secondary
+        alg_params = {
+            'INPUT': outputs['CalculatingSchoolAgesWithLowerAndUpperSecondary']['OUTPUT']
+        }
+        outputs['CreateSpatialIndexForLowerAndUpperSecondary'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(43)
         if feedback.isCanceled():
             return {}
 
@@ -524,24 +635,14 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
             'INPUT': parameters['Administrativeboundaries'],
             'JOIN': outputs['CreateSpatialIndexForSecondary']['OUTPUT'],
             'JOIN_FIELDS': [''],
-            'METHOD': 1,
-            'PREDICATE': [2],
+            'METHOD': 1,  # Take attributes of the first matching feature only (one-to-one)
+            'PREDICATE': [2],  # equals
             'PREFIX': '',
             'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
         }
         outputs['CreatingTheFileShapefileSecondary'] = processing.run('native:joinattributesbylocation', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(35)
-        if feedback.isCanceled():
-            return {}
-
-        # Create spatial index for administrative boundaries
-        alg_params = {
-            'INPUT': parameters['Administrativeboundaries']
-        }
-        outputs['CreateSpatialIndexForAdministrativeBoundaries'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(36)
+        feedback.setCurrentStep(44)
         if feedback.isCanceled():
             return {}
 
@@ -551,14 +652,31 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
             'INPUT': outputs['CreateSpatialIndexForAdministrativeBoundaries']['OUTPUT'],
             'JOIN': outputs['ReorganizingTheResults']['OUTPUT'],
             'JOIN_FIELDS': [''],
-            'METHOD': 1,
-            'PREDICATE': [2],
+            'METHOD': 1,  # Take attributes of the first matching feature only (one-to-one)
+            'PREDICATE': [2],  # equals
             'PREFIX': '',
             'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
         }
         outputs['CreatingTheFileShapefile'] = processing.run('native:joinattributesbylocation', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(37)
+        feedback.setCurrentStep(45)
+        if feedback.isCanceled():
+            return {}
+
+        # Creating the file shapefile (Lower and Upper secondary)
+        alg_params = {
+            'DISCARD_NONMATCHING': True,
+            'INPUT': parameters['Administrativeboundaries'],
+            'JOIN': outputs['CreateSpatialIndexForLowerAndUpperSecondary']['OUTPUT'],
+            'JOIN_FIELDS': [''],
+            'METHOD': 1,  # Take attributes of the first matching feature only (one-to-one)
+            'PREDICATE': [2],  # equals
+            'PREFIX': '',
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['CreatingTheFileShapefileLowerAndUpperSecondary'] = processing.run('native:joinattributesbylocation', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(46)
         if feedback.isCanceled():
             return {}
 
@@ -571,34 +689,20 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         outputs['DropFields'] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
         results['ResultsWithSecondary'] = outputs['DropFields']['OUTPUT']
 
-        feedback.setCurrentStep(38)
+        feedback.setCurrentStep(47)
         if feedback.isCanceled():
             return {}
 
-        # Create spatial index for Lower and Upper secondary
+        # Drop field(s)
         alg_params = {
-            'INPUT': outputs['CalculatingSchoolAgesWithLowerAndUpperSecondary']['OUTPUT']
+            'COLUMN': ['fid'],
+            'INPUT': outputs['CreatingTheFileShapefileLowerAndUpperSecondary']['OUTPUT'],
+            'OUTPUT': parameters['ResultsWithLowerAndUpperSecondary']
         }
-        outputs['CreateSpatialIndexForLowerAndUpperSecondary'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+        outputs['DropFields'] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+        results['ResultsWithLowerAndUpperSecondary'] = outputs['DropFields']['OUTPUT']
 
-        feedback.setCurrentStep(39)
-        if feedback.isCanceled():
-            return {}
-
-        # Creating the file shapefile (Lower and Upper secondary)
-        alg_params = {
-            'DISCARD_NONMATCHING': True,
-            'INPUT': parameters['Administrativeboundaries'],
-            'JOIN': outputs['CreateSpatialIndexForLowerAndUpperSecondary']['OUTPUT'],
-            'JOIN_FIELDS': [''],
-            'METHOD': 1,
-            'PREDICATE': [2],
-            'PREFIX': '',
-            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
-        }
-        outputs['CreatingTheFileShapefileLowerAndUpperSecondary'] = processing.run('native:joinattributesbylocation', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(40)
+        feedback.setCurrentStep(48)
         if feedback.isCanceled():
             return {}
 
@@ -613,7 +717,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['ExportingTheResultsToExcel'] = processing.run('native:savefeatures', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(41)
+        feedback.setCurrentStep(49)
         if feedback.isCanceled():
             return {}
 
@@ -626,20 +730,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         outputs['DropFields'] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
         results['Results'] = outputs['DropFields']['OUTPUT']
 
-        feedback.setCurrentStep(42)
-        if feedback.isCanceled():
-            return {}
-
-        # Drop field(s)
-        alg_params = {
-            'COLUMN': ['fid'],
-            'INPUT': outputs['CreatingTheFileShapefileLowerAndUpperSecondary']['OUTPUT'],
-            'OUTPUT': parameters['ResultsWithLowerAndUpperSecondary']
-        }
-        outputs['DropFields'] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-        results['ResultsWithLowerAndUpperSecondary'] = outputs['DropFields']['OUTPUT']
-
-        feedback.setCurrentStep(43)
+        feedback.setCurrentStep(50)
         if feedback.isCanceled():
             return {}
 
@@ -654,7 +745,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['ExportingTheResultsToExcel'] = processing.run('native:savefeatures', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(44)
+        feedback.setCurrentStep(51)
         if feedback.isCanceled():
             return {}
 
@@ -677,10 +768,10 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         return 'Sprague multipliers'
 
     def group(self):
-        return ''
+        return 'Final models'
 
     def groupId(self):
-        return ''
+        return 'Final models'
 
     def shortHelpString(self):
         return """<html><body><h2>Algorithm description</h2>
@@ -728,8 +819,6 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
 <p>This will only be created if the option to create custom school age groups and to make a distinction between Lower and Upper secondary is selected. It will create, in addition to the single year of age columns, additional columns by sex for each educational level. </p>
 <h3>Results with Secondary</h3>
 <p>This will only be created if the option to create custom school age groups is selected and the option to make a distinction between Lower and Upper secondary is unselected. It will create, in addition to the single year of age columns, additional columns by sex for each educational level. </p>
-<h3>Verbose logging</h3>
-<p></p>
 <h2>Outputs</h2>
 <h3>Results</h3>
 <p>This will only be calculated if the option to create custom school age groups is not selected. It will contain the same information as the Administrative boundaries' polygon layer, plus additional columns for the single years of age by sex.</p>
