@@ -42,9 +42,6 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         param = QgsProcessingParameterNumber('Primaryduration', 'Primary duration', optional=True, type=QgsProcessingParameterNumber.Integer, minValue=4, maxValue=8, defaultValue=None)
         param.setFlags(param.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
         self.addParameter(param)
-        param = QgsProcessingParameterBoolean('SystemdividedinLowerandUppersecondary', 'System divided in Lower and Upper secondary', optional=True, defaultValue=True)
-        param.setFlags(param.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
-        self.addParameter(param)
         param = QgsProcessingParameterNumber('Lowersecondarystartingage', 'Lower secondary starting age', optional=True, type=QgsProcessingParameterNumber.Integer, minValue=10, maxValue=15, defaultValue=None)
         param.setFlags(param.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
         self.addParameter(param)
@@ -57,20 +54,13 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         param = QgsProcessingParameterNumber('Uppersecondaryduration', 'Upper secondary duration', optional=True, type=QgsProcessingParameterNumber.Integer, minValue=1, maxValue=8, defaultValue=None)
         param.setFlags(param.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
         self.addParameter(param)
-        param = QgsProcessingParameterNumber('Secondarystartingage', 'Secondary starting age', optional=True, type=QgsProcessingParameterNumber.Integer, minValue=10, maxValue=14, defaultValue=None)
-        param.setFlags(param.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
-        self.addParameter(param)
-        param = QgsProcessingParameterNumber('Secondaryduration', 'Secondary duration', optional=True, type=QgsProcessingParameterNumber.Integer, minValue=1, maxValue=8, defaultValue=None)
-        param.setFlags(param.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
-        self.addParameter(param)
         self.addParameter(QgsProcessingParameterFeatureSink('Results', 'Results', type=QgsProcessing.TypeVectorAnyGeometry, createByDefault=True, supportsAppend=True, defaultValue=None))
         self.addParameter(QgsProcessingParameterFeatureSink('ResultsWithLowerAndUpperSecondary', 'Results with Lower and Upper secondary', type=QgsProcessing.TypeVectorAnyGeometry, createByDefault=True, supportsAppend=True, defaultValue=None))
-        self.addParameter(QgsProcessingParameterFeatureSink('ResultsWithSecondary', 'Results with Secondary', type=QgsProcessing.TypeVectorAnyGeometry, createByDefault=True, supportsAppend=True, defaultValue=None))
 
     def processAlgorithm(self, parameters, context, model_feedback):
         # Use a multi-step feedback, so that individual child algorithm progress reports are adjusted for the
         # overall progress through the model
-        feedback = QgsProcessingMultiStepFeedback(52, model_feedback)
+        feedback = QgsProcessingMultiStepFeedback(44, model_feedback)
         results = {}
         outputs = {}
 
@@ -104,51 +94,6 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         if feedback.isCanceled():
             return {}
 
-        # Create custom age groups
-        alg_params = {
-        }
-        outputs['CreateCustomAgeGroups'] = processing.run('native:condition', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(3)
-        if feedback.isCanceled():
-            return {}
-
-        # Preparing the table to export the parameters
-        alg_params = {
-            'FIELDS_MAPPING': [{'expression': ' @ISOcountrycode ','length': 0,'name': 'ISO country code','precision': 0,'type': 10},{'expression': ' @Year ','length': 0,'name': 'Year','precision': 0,'type': 2}],
-            'INPUT': outputs['RandomPointsInExtent']['OUTPUT'],
-            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
-        }
-        outputs['PreparingTheTableToExportTheParameters'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(4)
-        if feedback.isCanceled():
-            return {}
-
-        # Distinguish between Lower and Upper secondary
-        alg_params = {
-        }
-        outputs['DistinguishBetweenLowerAndUpperSecondary'] = processing.run('native:condition', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(5)
-        if feedback.isCanceled():
-            return {}
-
-        # Export to spreadsheet
-        alg_params = {
-            'FORMATTED_VALUES': False,
-            'LAYERS': outputs['PreparingTheTableToExportTheParameters']['OUTPUT'],
-            'OUTPUT': QgsExpression('@Foldercontainingtherasterfiles || \'/\' || \'Population_estimates_\' ||  lower(@ISOcountrycode)  || to_string( @Year ) || \'Parameters\' || \'.xlsx\'').evaluate(),
-            'OVERWRITE': False,
-            'USE_ALIAS': False,
-            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
-        }
-        outputs['ExportToSpreadsheet'] = processing.run('native:exporttospreadsheet', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(6)
-        if feedback.isCanceled():
-            return {}
-
         # Female 1 to 4
         alg_params = {
             'COLUMN_PREFIX': 'F_1_',
@@ -159,19 +104,30 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Female1To4'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(7)
+        feedback.setCurrentStep(3)
         if feedback.isCanceled():
             return {}
 
-        # Preparing the table to export the parameters - Secondary
+        # Create custom age groups
         alg_params = {
-            'FIELDS_MAPPING': [{'expression': ' @ISOcountrycode ','length': 0,'name': 'ISO country code','precision': 0,'type': 10},{'expression': ' @Year ','length': 0,'name': 'Year','precision': 0,'type': 2},{'expression': ' @Preprimarystartingage ','length': 0,'name': 'Pre-primary starting age','precision': 0,'type': 2},{'expression': ' @Preprimaryduration ','length': 0,'name': 'Pre-primary duration','precision': 0,'type': 2},{'expression': '@Primarystartingage','length': 0,'name': 'Primary starting age','precision': 0,'type': 2},{'expression': '@Primaryduration','length': 0,'name': 'Primary duration','precision': 0,'type': 2},{'expression': '@Lowersecondarystartingage','length': 0,'name': 'Lower secondary starting age','precision': 0,'type': 2},{'expression': '@Lowersecondaryduration','length': 0,'name': 'Lower secondary duration','precision': 0,'type': 2},{'expression': '@Uppersecondarystartingage','length': 0,'name': 'Upper secondary starting age','precision': 0,'type': 2},{'expression': '@Uppersecondaryduration','length': 0,'name': 'Upper secondary duration','precision': 0,'type': 2}],
-            'INPUT': outputs['RandomPointsInExtent']['OUTPUT'],
-            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
         }
-        outputs['PreparingTheTableToExportTheParametersSecondary'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+        outputs['CreateCustomAgeGroups'] = processing.run('native:condition', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(8)
+        feedback.setCurrentStep(4)
+        if feedback.isCanceled():
+            return {}
+
+        # Female 5 to 9
+        alg_params = {
+            'COLUMN_PREFIX': 'F_5_',
+            'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_5_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_5_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_5_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
+            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
+            'RASTER_BAND': 1,
+            'STATISTICS': [1],  # Sum
+        }
+        outputs['Female5To9'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(5)
         if feedback.isCanceled():
             return {}
 
@@ -183,7 +139,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['PreparingTheTableToExportTheParametersLowerAndUpperSecondary'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(9)
+        feedback.setCurrentStep(6)
         if feedback.isCanceled():
             return {}
 
@@ -198,36 +154,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['ExportToSpreadsheet'] = processing.run('native:exporttospreadsheet', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(10)
-        if feedback.isCanceled():
-            return {}
-
-        # Female 5 to 9
-        alg_params = {
-            'COLUMN_PREFIX': 'F_5_',
-            'INPUT_RASTER': QgsExpression('CASE\r\nWHEN NOT @Useunconstrainedpopulationestimates THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_5_\' ||to_string( @Year ) ||\'.tif\'\r\nWHEN  @Useunconstrainedpopulationestimates AND NOT  @UseUNadjustedconstrainedestimates  THEN @Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_5_\' ||to_string( @Year ) ||\'_constrained.tif\'\r\nELSE \r\n@Foldercontainingtherasterfiles || \'/\' ||  lower(to_string( @ISOcountrycode ))|| \'_f_5_\' ||to_string( @Year ) ||\'_constrained_UNadj.tif\'\r\nEND').evaluate(),
-            'INPUT_VECTOR': outputs['Female0To1']['OUTPUT'],
-            'RASTER_BAND': 1,
-            'STATISTICS': [1],  # Sum
-        }
-        outputs['Female5To9'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(11)
-        if feedback.isCanceled():
-            return {}
-
-        # Export to spreadsheet
-        alg_params = {
-            'FORMATTED_VALUES': False,
-            'LAYERS': outputs['PreparingTheTableToExportTheParametersSecondary']['OUTPUT'],
-            'OUTPUT': QgsExpression('@Foldercontainingtherasterfiles || \'/\' || \'Population_estimates_\' ||  lower(@ISOcountrycode)  || to_string( @Year ) || \'Parameters\' || \'.xlsx\'').evaluate(),
-            'OVERWRITE': False,
-            'USE_ALIAS': False,
-            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
-        }
-        outputs['ExportToSpreadsheet'] = processing.run('native:exporttospreadsheet', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(12)
+        feedback.setCurrentStep(7)
         if feedback.isCanceled():
             return {}
 
@@ -241,7 +168,34 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Female10To14'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(13)
+        feedback.setCurrentStep(8)
+        if feedback.isCanceled():
+            return {}
+
+        # Preparing the table to export the parameters
+        alg_params = {
+            'FIELDS_MAPPING': [{'expression': ' @ISOcountrycode ','length': 0,'name': 'ISO country code','precision': 0,'type': 10},{'expression': ' @Year ','length': 0,'name': 'Year','precision': 0,'type': 2}],
+            'INPUT': outputs['RandomPointsInExtent']['OUTPUT'],
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['PreparingTheTableToExportTheParameters'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(9)
+        if feedback.isCanceled():
+            return {}
+
+        # Export to spreadsheet
+        alg_params = {
+            'FORMATTED_VALUES': False,
+            'LAYERS': outputs['PreparingTheTableToExportTheParameters']['OUTPUT'],
+            'OUTPUT': QgsExpression('@Foldercontainingtherasterfiles || \'/\' || \'Population_estimates_\' ||  lower(@ISOcountrycode)  || to_string( @Year ) || \'Parameters\' || \'.xlsx\'').evaluate(),
+            'OVERWRITE': False,
+            'USE_ALIAS': False,
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['ExportToSpreadsheet'] = processing.run('native:exporttospreadsheet', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(10)
         if feedback.isCanceled():
             return {}
 
@@ -255,7 +209,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Female15To19'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(14)
+        feedback.setCurrentStep(11)
         if feedback.isCanceled():
             return {}
 
@@ -269,7 +223,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Female20To24'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(15)
+        feedback.setCurrentStep(12)
         if feedback.isCanceled():
             return {}
 
@@ -283,7 +237,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Female25To29'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(16)
+        feedback.setCurrentStep(13)
         if feedback.isCanceled():
             return {}
 
@@ -297,7 +251,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Female30To34'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(17)
+        feedback.setCurrentStep(14)
         if feedback.isCanceled():
             return {}
 
@@ -311,7 +265,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Female35To39'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(18)
+        feedback.setCurrentStep(15)
         if feedback.isCanceled():
             return {}
 
@@ -325,7 +279,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Male0To1'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(19)
+        feedback.setCurrentStep(16)
         if feedback.isCanceled():
             return {}
 
@@ -339,7 +293,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Male1To4'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(20)
+        feedback.setCurrentStep(17)
         if feedback.isCanceled():
             return {}
 
@@ -353,7 +307,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Male5To9'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(21)
+        feedback.setCurrentStep(18)
         if feedback.isCanceled():
             return {}
 
@@ -367,7 +321,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Male10To14'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(22)
+        feedback.setCurrentStep(19)
         if feedback.isCanceled():
             return {}
 
@@ -381,7 +335,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Male15To19'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(23)
+        feedback.setCurrentStep(20)
         if feedback.isCanceled():
             return {}
 
@@ -395,7 +349,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Male20To24'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(24)
+        feedback.setCurrentStep(21)
         if feedback.isCanceled():
             return {}
 
@@ -409,7 +363,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Male25To29'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(25)
+        feedback.setCurrentStep(22)
         if feedback.isCanceled():
             return {}
 
@@ -423,7 +377,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Male30To34'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(26)
+        feedback.setCurrentStep(23)
         if feedback.isCanceled():
             return {}
 
@@ -437,7 +391,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['Male35To39'] = processing.run('native:zonalstatistics', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(27)
+        feedback.setCurrentStep(24)
         if feedback.isCanceled():
             return {}
 
@@ -449,7 +403,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreatingThe0To4AgeGroups'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(28)
+        feedback.setCurrentStep(25)
         if feedback.isCanceled():
             return {}
 
@@ -461,7 +415,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CalculatingSingleYearsOfAgeSection1'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(29)
+        feedback.setCurrentStep(26)
         if feedback.isCanceled():
             return {}
 
@@ -471,7 +425,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreateSpatialIndexSection1'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(30)
+        feedback.setCurrentStep(27)
         if feedback.isCanceled():
             return {}
 
@@ -483,7 +437,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CalculatingSingleYearsOfAgeSection2'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(31)
+        feedback.setCurrentStep(28)
         if feedback.isCanceled():
             return {}
 
@@ -493,7 +447,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreateSpatialIndexSection2'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(32)
+        feedback.setCurrentStep(29)
         if feedback.isCanceled():
             return {}
 
@@ -505,7 +459,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CalculatingSingleYearsOfAgeSection3'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(33)
+        feedback.setCurrentStep(30)
         if feedback.isCanceled():
             return {}
 
@@ -515,7 +469,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreateSpatialIndexSection3'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(34)
+        feedback.setCurrentStep(31)
         if feedback.isCanceled():
             return {}
 
@@ -532,7 +486,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['JoinAttributesByLocationSection1And2'] = processing.run('native:joinattributesbylocation', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(35)
+        feedback.setCurrentStep(32)
         if feedback.isCanceled():
             return {}
 
@@ -542,7 +496,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreateSpatialIndexForSection1And2'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(36)
+        feedback.setCurrentStep(33)
         if feedback.isCanceled():
             return {}
 
@@ -559,7 +513,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['JoinAttributesByLocationSections1Through3'] = processing.run('native:joinattributesbylocation', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(37)
+        feedback.setCurrentStep(34)
         if feedback.isCanceled():
             return {}
 
@@ -571,29 +525,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['ReorganizingTheResults'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(38)
-        if feedback.isCanceled():
-            return {}
-
-        # Calculating school ages with Secondary
-        alg_params = {
-            'FIELDS_MAPPING': [{'expression': '\"Y_M_0\"','length': 0,'name': 'Y_M_0','precision': 0,'type': 6},{'expression': '\"Y_M_1\"','length': 0,'name': 'Y_M_1','precision': 0,'type': 6},{'expression': '\"Y_M_2\"','length': 0,'name': 'Y_M_2','precision': 0,'type': 6},{'expression': '\"Y_M_3\"','length': 0,'name': 'Y_M_3','precision': 0,'type': 6},{'expression': '\"Y_M_4\"','length': 0,'name': 'Y_M_4','precision': 0,'type': 6},{'expression': '\"Y_M_5\"','length': 0,'name': 'Y_M_5','precision': 0,'type': 6},{'expression': '\"Y_M_6\"','length': 0,'name': 'Y_M_6','precision': 0,'type': 6},{'expression': '\"Y_M_7\"','length': 0,'name': 'Y_M_7','precision': 0,'type': 6},{'expression': '\"Y_M_8\"','length': 0,'name': 'Y_M_8','precision': 0,'type': 6},{'expression': '\"Y_M_9\"','length': 0,'name': 'Y_M_9','precision': 0,'type': 6},{'expression': '\"Y_M_10\"','length': 0,'name': 'Y_M_10','precision': 0,'type': 6},{'expression': '\"Y_M_11\"','length': 0,'name': 'Y_M_11','precision': 0,'type': 6},{'expression': '\"Y_M_12\"','length': 0,'name': 'Y_M_12','precision': 0,'type': 6},{'expression': '\"Y_M_13\"','length': 0,'name': 'Y_M_13','precision': 0,'type': 6},{'expression': '\"Y_M_14\"','length': 0,'name': 'Y_M_14','precision': 0,'type': 6},{'expression': '\"Y_M_15\"','length': 0,'name': 'Y_M_15','precision': 0,'type': 6},{'expression': '\"Y_M_16\"','length': 0,'name': 'Y_M_16','precision': 0,'type': 6},{'expression': '\"Y_M_17\"','length': 0,'name': 'Y_M_17','precision': 0,'type': 6},{'expression': '\"Y_M_18\"','length': 0,'name': 'Y_M_18','precision': 0,'type': 6},{'expression': '\"Y_M_19\"','length': 0,'name': 'Y_M_19','precision': 0,'type': 6},{'expression': '\"Y_M_20\"','length': 0,'name': 'Y_M_20','precision': 0,'type': 6},{'expression': '\"Y_M_21\"','length': 0,'name': 'Y_M_21','precision': 0,'type': 6},{'expression': '\"Y_M_22\"','length': 0,'name': 'Y_M_22','precision': 0,'type': 6},{'expression': '\"Y_M_23\"','length': 0,'name': 'Y_M_23','precision': 0,'type': 6},{'expression': '\"Y_M_24\"','length': 0,'name': 'Y_M_24','precision': 0,'type': 6},{'expression': '\"Y_M_25\"','length': 0,'name': 'Y_M_25','precision': 0,'type': 6},{'expression': '\"Y_M_26\"','length': 0,'name': 'Y_M_26','precision': 0,'type': 6},{'expression': '\"Y_M_27\"','length': 0,'name': 'Y_M_27','precision': 0,'type': 6},{'expression': '\"Y_M_28\"','length': 0,'name': 'Y_M_28','precision': 0,'type': 6},{'expression': '\"Y_M_29\"','length': 0,'name': 'Y_M_29','precision': 0,'type': 6},{'expression': '\"Y_F_0\"','length': 0,'name': 'Y_F_0','precision': 0,'type': 6},{'expression': '\"Y_F_1\"','length': 0,'name': 'Y_F_1','precision': 0,'type': 6},{'expression': '\"Y_F_2\"','length': 0,'name': 'Y_F_2','precision': 0,'type': 6},{'expression': '\"Y_F_3\"','length': 0,'name': 'Y_F_3','precision': 0,'type': 6},{'expression': '\"Y_F_4\"','length': 0,'name': 'Y_F_4','precision': 0,'type': 6},{'expression': '\"Y_F_5\"','length': 0,'name': 'Y_F_5','precision': 0,'type': 6},{'expression': '\"Y_F_6\"','length': 0,'name': 'Y_F_6','precision': 0,'type': 6},{'expression': '\"Y_F_7\"','length': 0,'name': 'Y_F_7','precision': 0,'type': 6},{'expression': '\"Y_F_8\"','length': 0,'name': 'Y_F_8','precision': 0,'type': 6},{'expression': '\"Y_F_9\"','length': 0,'name': 'Y_F_9','precision': 0,'type': 6},{'expression': '\"Y_F_10\"','length': 0,'name': 'Y_F_10','precision': 0,'type': 6},{'expression': '\"Y_F_11\"','length': 0,'name': 'Y_F_11','precision': 0,'type': 6},{'expression': '\"Y_F_12\"','length': 0,'name': 'Y_F_12','precision': 0,'type': 6},{'expression': '\"Y_F_13\"','length': 0,'name': 'Y_F_13','precision': 0,'type': 6},{'expression': '\"Y_F_14\"','length': 0,'name': 'Y_F_14','precision': 0,'type': 6},{'expression': '\"Y_F_15\"','length': 0,'name': 'Y_F_15','precision': 0,'type': 6},{'expression': '\"Y_F_16\"','length': 0,'name': 'Y_F_16','precision': 0,'type': 6},{'expression': '\"Y_F_17\"','length': 0,'name': 'Y_F_17','precision': 0,'type': 6},{'expression': '\"Y_F_18\"','length': 0,'name': 'Y_F_18','precision': 0,'type': 6},{'expression': '\"Y_F_19\"','length': 0,'name': 'Y_F_19','precision': 0,'type': 6},{'expression': '\"Y_F_20\"','length': 0,'name': 'Y_F_20','precision': 0,'type': 6},{'expression': '\"Y_F_21\"','length': 0,'name': 'Y_F_21','precision': 0,'type': 6},{'expression': '\"Y_F_22\"','length': 0,'name': 'Y_F_22','precision': 0,'type': 6},{'expression': '\"Y_F_23\"','length': 0,'name': 'Y_F_23','precision': 0,'type': 6},{'expression': '\"Y_F_24\"','length': 0,'name': 'Y_F_24','precision': 0,'type': 6},{'expression': '\"Y_F_25\"','length': 0,'name': 'Y_F_25','precision': 0,'type': 6},{'expression': '\"Y_F_26\"','length': 0,'name': 'Y_F_26','precision': 0,'type': 6},{'expression': '\"Y_F_27\"','length': 0,'name': 'Y_F_27','precision': 0,'type': 6},{'expression': '\"Y_F_28\"','length': 0,'name': 'Y_F_28','precision': 0,'type': 6},{'expression': '\"Y_F_29\"','length': 0,'name': 'Y_F_29','precision': 0,'type': 6},{'expression': '\"Y_T_0\"','length': 0,'name': 'Y_T_0','precision': 0,'type': 6},{'expression': '\"Y_T_1\"','length': 0,'name': 'Y_T_1','precision': 0,'type': 6},{'expression': '\"Y_T_2\"','length': 0,'name': 'Y_T_2','precision': 0,'type': 6},{'expression': '\"Y_T_3\"','length': 0,'name': 'Y_T_3','precision': 0,'type': 6},{'expression': '\"Y_T_4\"','length': 0,'name': 'Y_T_4','precision': 0,'type': 6},{'expression': '\"Y_T_5\"','length': 0,'name': 'Y_T_5','precision': 0,'type': 6},{'expression': '\"Y_T_6\"','length': 0,'name': 'Y_T_6','precision': 0,'type': 6},{'expression': '\"Y_T_7\"','length': 0,'name': 'Y_T_7','precision': 0,'type': 6},{'expression': '\"Y_T_8\"','length': 0,'name': 'Y_T_8','precision': 0,'type': 6},{'expression': '\"Y_T_9\"','length': 0,'name': 'Y_T_9','precision': 0,'type': 6},{'expression': '\"Y_T_10\"','length': 0,'name': 'Y_T_10','precision': 0,'type': 6},{'expression': '\"Y_T_11\"','length': 0,'name': 'Y_T_11','precision': 0,'type': 6},{'expression': '\"Y_T_12\"','length': 0,'name': 'Y_T_12','precision': 0,'type': 6},{'expression': '\"Y_T_13\"','length': 0,'name': 'Y_T_13','precision': 0,'type': 6},{'expression': '\"Y_T_14\"','length': 0,'name': 'Y_T_14','precision': 0,'type': 6},{'expression': '\"Y_T_15\"','length': 0,'name': 'Y_T_15','precision': 0,'type': 6},{'expression': '\"Y_T_16\"','length': 0,'name': 'Y_T_16','precision': 0,'type': 6},{'expression': '\"Y_T_17\"','length': 0,'name': 'Y_T_17','precision': 0,'type': 6},{'expression': '\"Y_T_18\"','length': 0,'name': 'Y_T_18','precision': 0,'type': 6},{'expression': '\"Y_T_19\"','length': 0,'name': 'Y_T_19','precision': 0,'type': 6},{'expression': '\"Y_T_20\"','length': 0,'name': 'Y_T_20','precision': 0,'type': 6},{'expression': '\"Y_T_21\"','length': 0,'name': 'Y_T_21','precision': 0,'type': 6},{'expression': '\"Y_T_22\"','length': 0,'name': 'Y_T_22','precision': 0,'type': 6},{'expression': '\"Y_T_23\"','length': 0,'name': 'Y_T_23','precision': 0,'type': 6},{'expression': '\"Y_T_24\"','length': 0,'name': 'Y_T_24','precision': 0,'type': 6},{'expression': '\"Y_T_25\"','length': 0,'name': 'Y_T_25','precision': 0,'type': 6},{'expression': '\"Y_T_26\"','length': 0,'name': 'Y_T_26','precision': 0,'type': 6},{'expression': '\"Y_T_27\"','length': 0,'name': 'Y_T_27','precision': 0,'type': 6},{'expression': '\"Y_T_28\"','length': 0,'name': 'Y_T_28','precision': 0,'type': 6},{'expression': '\"Y_T_29\"','length': 0,'name': 'Y_T_29','precision': 0,'type': 6},{'expression': 'eval(array_to_string(array_foreach(generate_series( @Preprimarystartingage ,  @Preprimarystartingage + @Preprimaryduration - 1),concat(\'\"Y_F_\',@element,\'\"\')),\'+\'))','length': 0,'name': 'Pre_primary_F','precision': 0,'type': 6},{'expression': 'eval(array_to_string(array_foreach(generate_series( @Preprimarystartingage ,  @Preprimarystartingage + @Preprimaryduration - 1),concat(\'\"Y_M_\',@element,\'\"\')),\'+\'))','length': 0,'name': 'Pre_primary_M','precision': 0,'type': 6},{'expression': 'eval(array_to_string(array_foreach(generate_series( @Preprimarystartingage ,  @Preprimarystartingage + @Preprimaryduration - 1),concat(\'\"Y_T_\',@element,\'\"\')),\'+\'))','length': 0,'name': 'Pre_primary_T','precision': 0,'type': 6},{'expression': 'eval(array_to_string(array_foreach(generate_series(  @Primarystartingage  ,   @Primarystartingage  +  @Primaryduration  - 1),concat(\'\"Y_F_\',@element,\'\"\')),\'+\'))','length': 0,'name': 'Primary_F','precision': 0,'type': 6},{'expression': 'eval(array_to_string(array_foreach(generate_series( @Primarystartingage ,  @Primarystartingage + @Primaryduration - 1),concat(\'\"Y_M_\',@element,\'\"\')),\'+\'))','length': 0,'name': 'Primary_M','precision': 0,'type': 6},{'expression': 'eval(array_to_string(array_foreach(generate_series( @Primarystartingage ,  @Primarystartingage + @Primaryduration - 1),concat(\'\"Y_T_\',@element,\'\"\')),\'+\'))','length': 0,'name': 'Primary_T','precision': 0,'type': 6},{'expression': 'eval(array_to_string(array_foreach(generate_series(    @Secondarystartingage    ,     @Secondarystartingage + @Secondaryduration    - 1),concat(\'\"Y_F_\',@element,\'\"\')),\'+\'))','length': 0,'name': 'Sec_F','precision': 0,'type': 6},{'expression': 'eval(array_to_string(array_foreach(generate_series(    @Secondarystartingage    ,     @Secondarystartingage + @Secondaryduration    - 1),concat(\'\"Y_M_\',@element,\'\"\')),\'+\'))','length': 0,'name': 'Sec_M','precision': 0,'type': 6},{'expression': 'eval(array_to_string(array_foreach(generate_series(    @Secondarystartingage    ,     @Secondarystartingage + @Secondaryduration    - 1),concat(\'\"Y_T_\',@element,\'\"\')),\'+\'))','length': 0,'name': 'Sec_T','precision': 0,'type': 6}],
-            'INPUT': outputs['ReorganizingTheResults']['OUTPUT'],
-            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
-        }
-        outputs['CalculatingSchoolAgesWithSecondary'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(39)
-        if feedback.isCanceled():
-            return {}
-
-        # Create spatial index for administrative boundaries
-        alg_params = {
-            'INPUT': parameters['Administrativeboundaries']
-        }
-        outputs['CreateSpatialIndexForAdministrativeBoundaries'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(40)
+        feedback.setCurrentStep(35)
         if feedback.isCanceled():
             return {}
 
@@ -605,17 +537,17 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CalculatingSchoolAgesWithLowerAndUpperSecondary'] = processing.run('native:refactorfields', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(41)
+        feedback.setCurrentStep(36)
         if feedback.isCanceled():
             return {}
 
-        # Create spatial index for Secondary
+        # Create spatial index for administrative boundaries
         alg_params = {
-            'INPUT': outputs['CalculatingSchoolAgesWithSecondary']['OUTPUT']
+            'INPUT': parameters['Administrativeboundaries']
         }
-        outputs['CreateSpatialIndexForSecondary'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+        outputs['CreateSpatialIndexForAdministrativeBoundaries'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(42)
+        feedback.setCurrentStep(37)
         if feedback.isCanceled():
             return {}
 
@@ -625,24 +557,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreateSpatialIndexForLowerAndUpperSecondary'] = processing.run('native:createspatialindex', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(43)
-        if feedback.isCanceled():
-            return {}
-
-        # Creating the file shapefile (Secondary)
-        alg_params = {
-            'DISCARD_NONMATCHING': True,
-            'INPUT': parameters['Administrativeboundaries'],
-            'JOIN': outputs['CreateSpatialIndexForSecondary']['OUTPUT'],
-            'JOIN_FIELDS': [''],
-            'METHOD': 1,  # Take attributes of the first matching feature only (one-to-one)
-            'PREDICATE': [2],  # equals
-            'PREFIX': '',
-            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
-        }
-        outputs['CreatingTheFileShapefileSecondary'] = processing.run('native:joinattributesbylocation', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(44)
+        feedback.setCurrentStep(38)
         if feedback.isCanceled():
             return {}
 
@@ -659,7 +574,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreatingTheFileShapefile'] = processing.run('native:joinattributesbylocation', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(45)
+        feedback.setCurrentStep(39)
         if feedback.isCanceled():
             return {}
 
@@ -676,48 +591,7 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         }
         outputs['CreatingTheFileShapefileLowerAndUpperSecondary'] = processing.run('native:joinattributesbylocation', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(46)
-        if feedback.isCanceled():
-            return {}
-
-        # Drop field(s)
-        alg_params = {
-            'COLUMN': ['fid'],
-            'INPUT': outputs['CreatingTheFileShapefileSecondary']['OUTPUT'],
-            'OUTPUT': parameters['ResultsWithSecondary']
-        }
-        outputs['DropFields'] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-        results['ResultsWithSecondary'] = outputs['DropFields']['OUTPUT']
-
-        feedback.setCurrentStep(47)
-        if feedback.isCanceled():
-            return {}
-
-        # Drop field(s)
-        alg_params = {
-            'COLUMN': ['fid'],
-            'INPUT': outputs['CreatingTheFileShapefileLowerAndUpperSecondary']['OUTPUT'],
-            'OUTPUT': parameters['ResultsWithLowerAndUpperSecondary']
-        }
-        outputs['DropFields'] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-        results['ResultsWithLowerAndUpperSecondary'] = outputs['DropFields']['OUTPUT']
-
-        feedback.setCurrentStep(48)
-        if feedback.isCanceled():
-            return {}
-
-        # Exporting the results to Excel
-        alg_params = {
-            'DATASOURCE_OPTIONS': '',
-            'INPUT': outputs['CreatingTheFileShapefileSecondary']['OUTPUT'],
-            'LAYER_NAME': '',
-            'LAYER_OPTIONS': '',
-            'OUTPUT': QgsExpression('@Foldercontainingtherasterfiles || \'/\' || \'Population_estimates_\' ||  lower(@ISOcountrycode)  || to_string( @Year ) || \'SchoolAge\' || \'.xlsx\'').evaluate(),
-            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
-        }
-        outputs['ExportingTheResultsToExcel'] = processing.run('native:savefeatures', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(49)
+        feedback.setCurrentStep(40)
         if feedback.isCanceled():
             return {}
 
@@ -730,22 +604,20 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
         outputs['DropFields'] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
         results['Results'] = outputs['DropFields']['OUTPUT']
 
-        feedback.setCurrentStep(50)
+        feedback.setCurrentStep(41)
         if feedback.isCanceled():
             return {}
 
-        # Exporting the results to Excel
+        # Drop field(s)
         alg_params = {
-            'DATASOURCE_OPTIONS': '',
+            'COLUMN': ['fid'],
             'INPUT': outputs['CreatingTheFileShapefileLowerAndUpperSecondary']['OUTPUT'],
-            'LAYER_NAME': '',
-            'LAYER_OPTIONS': '',
-            'OUTPUT': QgsExpression('@Foldercontainingtherasterfiles || \'/\' || \'Population_estimates_\' ||  lower(@ISOcountrycode)  || to_string( @Year ) || \'SchoolAge\' || \'.xlsx\'').evaluate(),
-            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+            'OUTPUT': parameters['ResultsWithLowerAndUpperSecondary']
         }
-        outputs['ExportingTheResultsToExcel'] = processing.run('native:savefeatures', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+        outputs['DropFields'] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+        results['ResultsWithLowerAndUpperSecondary'] = outputs['DropFields']['OUTPUT']
 
-        feedback.setCurrentStep(51)
+        feedback.setCurrentStep(42)
         if feedback.isCanceled():
             return {}
 
@@ -756,6 +628,21 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
             'LAYER_NAME': '',
             'LAYER_OPTIONS': '',
             'OUTPUT': QgsExpression('@Foldercontainingtherasterfiles || \'/\' || \'Population_estimates_\' ||  upper(@ISOcountrycode) || \'_\'  || to_string( @Year ) || \'.xlsx\'').evaluate(),
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['ExportingTheResultsToExcel'] = processing.run('native:savefeatures', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(43)
+        if feedback.isCanceled():
+            return {}
+
+        # Exporting the results to Excel
+        alg_params = {
+            'DATASOURCE_OPTIONS': '',
+            'INPUT': outputs['CreatingTheFileShapefileLowerAndUpperSecondary']['OUTPUT'],
+            'LAYER_NAME': '',
+            'LAYER_OPTIONS': '',
+            'OUTPUT': QgsExpression('@Foldercontainingtherasterfiles || \'/\' || \'Population_estimates_\' ||  lower(@ISOcountrycode)  || to_string( @Year ) || \'SchoolAge\' || \'.xlsx\'').evaluate(),
             'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
         }
         outputs['ExportingTheResultsToExcel'] = processing.run('native:savefeatures', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
@@ -799,8 +686,6 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
 <p>This must be a number.</p>
 <h3>Primary duration</h3>
 <p>This must be a number.</p>
-<h3>System divided in Lower and Upper secondary</h3>
-<p>Select if the education system is divided in Lower and Upper Secondary.</p>
 <h3>Lower secondary starting age</h3>
 <p>This must be a number.</p>
 <h3>Lower secondary duration</h3>
@@ -809,23 +694,15 @@ class SpragueMultipliers(QgsProcessingAlgorithm):
 <p>This must be a number.</p>
 <h3>Upper secondary duration</h3>
 <p>This must be a number.</p>
-<h3>Secondary starting age</h3>
-<p>This must be a number.</p>
-<h3>Secondary duration</h3>
-<p>This must be a number.</p>
 <h3>Results</h3>
 <p>This will only be calculated if the option to create custom school age groups is not selected. It will contain the same information as the Administrative boundaries' polygon layer, plus additional columns for the single years of age by sex.</p>
 <h3>Results with Lower and Upper secondary</h3>
 <p>This will only be created if the option to create custom school age groups and to make a distinction between Lower and Upper secondary is selected. It will create, in addition to the single year of age columns, additional columns by sex for each educational level. </p>
-<h3>Results with Secondary</h3>
-<p>This will only be created if the option to create custom school age groups is selected and the option to make a distinction between Lower and Upper secondary is unselected. It will create, in addition to the single year of age columns, additional columns by sex for each educational level. </p>
 <h2>Outputs</h2>
 <h3>Results</h3>
 <p>This will only be calculated if the option to create custom school age groups is not selected. It will contain the same information as the Administrative boundaries' polygon layer, plus additional columns for the single years of age by sex.</p>
 <h3>Results with Lower and Upper secondary</h3>
 <p>This will only be created if the option to create custom school age groups and to make a distinction between Lower and Upper secondary is selected. It will create, in addition to the single year of age columns, additional columns by sex for each educational level. </p>
-<h3>Results with Secondary</h3>
-<p>This will only be created if the option to create custom school age groups is selected and the option to make a distinction between Lower and Upper secondary is unselected. It will create, in addition to the single year of age columns, additional columns by sex for each educational level. </p>
 <br><p align="right">Algorithm author: Development unit, IIEP-UNESCO (development@iiep.unesco.org)
 The designations employed and the presentation of the material in this publication do not imply the expression of any opinion whatsoever on the part of UNESCO or IIEP concerning the legal status of any country, territory, city or area, or of its authorities, or concerning the delimitation of its frontiers or boundaries. 
 This material has been partly funded by UK aid from the UK government; however the views expressed do not necessarily reflect the UK government’s official policies.</p><p align="right">Help author: Development unit, IIEP-UNESCO (development@iiep.unesco.org)</p><p align="right">Algorithm version: 1.0</p></body></html>"""
